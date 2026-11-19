@@ -1,15 +1,40 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
+        onConnectionCreate: (connection: Connection) => {
+          const logger = new Logger('MongoDB');
+
+          connection.on('connected', () => {
+            logger.log('✅ MongoDB Atlas connected successfully!');
+          });
+
+          connection.on('disconnected', () => {
+            logger.warn('⚠️ MongoDB disconnected.');
+          });
+
+          connection.on('error', (error) => {
+            logger.error('❌ MongoDB connection error:', error);
+          });
+
+          return connection;
+        },
+      }),
+      inject: [ConfigService],
     }),
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com,
