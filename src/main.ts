@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     instrument: ObserveInstrument,
   });
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
     .setDescription('API description')
