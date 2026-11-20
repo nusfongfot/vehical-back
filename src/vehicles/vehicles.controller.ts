@@ -54,8 +54,20 @@ export class VehiclesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
-    return this.vehiclesService.update(+id, updateVehicleDto);
+  @ApiParam({ name: 'id', type: String, description: 'รหัส ObjectId ของรถ' })
+  async update(
+    @Param('id') id: Types.ObjectId,
+    @Body() updateVehicleDto: UpdateVehicleDto,
+  ) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('รูปแบบ ID ไม่ถูกต้อง');
+    }
+    const data = await this.vehiclesService.update(id, updateVehicleDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'แก้ไขข้อมูลสำเร็จ',
+      data,
+    };
   }
 
   @Delete(':id')

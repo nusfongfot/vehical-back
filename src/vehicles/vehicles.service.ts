@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -7,7 +8,7 @@ import {
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleEntity } from './entities/vehicle.entity';
-import { Types } from 'mongoose';
+import { mongo, Types } from 'mongoose';
 @Injectable()
 export class VehiclesService {
   constructor(private readonly vehicleEntity: VehicleEntity) {}
@@ -51,8 +52,29 @@ export class VehiclesService {
     }
   }
 
-  update(id: number, updateVehicleDto: UpdateVehicleDto) {
-    return `This action updates a #${id} vehicle`;
+  async update(id: Types.ObjectId, updateVehicleDto: UpdateVehicleDto) {
+    try {
+      const data = await this.vehicleEntity.findOneAndUpdate(
+        {
+          _id: id,
+        },
+        {
+          $set: updateVehicleDto,
+        },
+      );
+      if (!data) {
+        throw new NotFoundException(`ไม่พบข้อมูลรถรหัส ${id}`);
+      }
+      return data;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      if (error instanceof mongo.MongoServerError && error.code === 11000) {
+        throw new BadRequestException('ข้อมูลที่อัปเดตซ้ำกับข้อมูลที่มีอยู่ในระบบ');
+      }
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
+    }
   }
 
   remove(id: number) {
