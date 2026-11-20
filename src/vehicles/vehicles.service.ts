@@ -23,8 +23,15 @@ export class VehiclesService {
     }
   }
 
-  findAll() {
-    return `This action returns all vehicles`;
+  async findAll() {
+    try {
+      const data = await this.vehicleEntity.find();
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
+    }
   }
 
   findOne(id: number) {

@@ -27,8 +27,13 @@ export class VehiclesController {
   }
 
   @Get()
-  findAll() {
-    return this.vehiclesService.findAll();
+  async findAll() {
+    const data = await this.vehiclesService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'เรียกข้อมูลสำเร็จ',
+      data,
+    };
   }
 
   @Get(':id')
