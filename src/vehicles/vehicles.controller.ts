@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   HttpStatus,
-  BadRequestException,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -15,6 +14,7 @@ import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { Types } from 'mongoose';
 import { ApiParam } from '@nestjs/swagger';
 import { DeleteVehiclesDto } from './dto/delete.dto copy';
+import { MongoIdParamDto } from './dto/mongo-id.dto';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -42,11 +42,9 @@ export class VehiclesController {
 
   @Get(':id')
   @ApiParam({ name: 'id', type: String, description: 'รหัส ObjectId ของรถ' })
-  async findOne(@Param('id') id: Types.ObjectId) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('รูปแบบ ID ไม่ถูกต้อง');
-    }
-    const data = await this.vehiclesService.findOne(id);
+  async findOne(@Param() params: MongoIdParamDto) {
+    const mongoId = new Types.ObjectId(params.id);
+    const data = await this.vehiclesService.findOne(mongoId);
     return {
       statusCode: HttpStatus.OK,
       message: 'เรียกข้อมูลสำเร็จ',
@@ -57,13 +55,11 @@ export class VehiclesController {
   @Patch(':id')
   @ApiParam({ name: 'id', type: String, description: 'รหัส ObjectId ของรถ' })
   async update(
-    @Param('id') id: Types.ObjectId,
+    @Param() params: MongoIdParamDto,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('รูปแบบ ID ไม่ถูกต้อง');
-    }
-    const data = await this.vehiclesService.update(id, updateVehicleDto);
+    const mongoId = new Types.ObjectId(params.id);
+    const data = await this.vehiclesService.update(mongoId, updateVehicleDto);
     return {
       statusCode: HttpStatus.OK,
       message: 'แก้ไขข้อมูลสำเร็จ',
@@ -73,11 +69,9 @@ export class VehiclesController {
 
   @Delete(':id')
   @ApiParam({ name: 'id', type: String, description: 'รหัส ObjectId ของรถ' })
-  async remove(@Param('id') id: Types.ObjectId) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('รูปแบบ ID ไม่ถูกต้อง');
-    }
-    const data = await this.vehiclesService.remove(id);
+  async remove(@Param() params: MongoIdParamDto) {
+    const mongoId = new Types.ObjectId(params.id);
+    const data = await this.vehiclesService.remove(mongoId);
     return {
       statusCode: HttpStatus.OK,
       message: 'ลบข้อมูลสำเร็จ',
