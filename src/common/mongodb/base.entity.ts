@@ -37,4 +37,9 @@ export abstract class BaseEntity<T> {
     const result = await this.entityModel.deleteOne(filter).exec();
     return result.deletedCount > 0;
   }
+
+  async deleteMany(filter: QueryFilter<HydratedDocument<T>>): Promise<number> {
+    const result = await this.entityModel.deleteMany(filter).exec();
+    return result.deletedCount;
+  }
 }
