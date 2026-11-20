@@ -14,6 +14,7 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { Types } from 'mongoose';
 import { ApiParam } from '@nestjs/swagger';
+import { DeleteVehiclesDto } from './dto/delete.dto copy';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -80,6 +81,17 @@ export class VehiclesController {
     return {
       statusCode: HttpStatus.OK,
       message: 'ลบข้อมูลสำเร็จ',
+      data,
+    };
+  }
+
+  @Delete()
+  async removeAll(@Body() deleteVehiclesDto: DeleteVehiclesDto) {
+    const objectIds = deleteVehiclesDto.ids.map((id) => new Types.ObjectId(id));
+    const data = await this.vehiclesService.removeAll(objectIds);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'ลบข้อมูลทั้งหมดสำเร็จ',
       data,
     };
   }

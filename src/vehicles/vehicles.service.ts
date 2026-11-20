@@ -93,4 +93,21 @@ export class VehiclesService {
       throw new InternalServerErrorException('เกิดข้อผิดพลาดในการลบข้อมูล');
     }
   }
+
+  async removeAll(ids: Types.ObjectId[]) {
+    try {
+      const result = await this.vehicleEntity.deleteMany({
+        _id: { $in: ids },
+      });
+      if (result === 0) {
+        throw new NotFoundException('ไม่พบข้อมูลรถที่ต้องการลบ (ข้อมูลอาจถูกลบไปแล้ว)');
+      }
+      return { deleted: true, count: ids.length };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการลบข้อมูล');
+    }
+  }
 }
