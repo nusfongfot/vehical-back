@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { Types } from 'mongoose';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -31,14 +34,23 @@ export class VehiclesController {
     const data = await this.vehiclesService.findAll();
     return {
       statusCode: HttpStatus.OK,
-      message: 'เรียกข้อมูลสำเร็จ',
+      message: 'เรียกข้อมูลทั้งหมดสำเร็จ',
       data,
     };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.vehiclesService.findOne(+id);
+  @ApiParam({ name: 'id', type: String, description: 'รหัส ObjectId ของรถ' })
+  async findOne(@Param('id') id: Types.ObjectId) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('รูปแบบ ID ไม่ถูกต้อง');
+    }
+    const data = await this.vehiclesService.findOne(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'เรียกข้อมูลสำเร็จ',
+      data,
+    };
   }
 
   @Patch(':id')

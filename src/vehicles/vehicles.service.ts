@@ -2,11 +2,12 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleEntity } from './entities/vehicle.entity';
-
+import { Types } from 'mongoose';
 @Injectable()
 export class VehiclesService {
   constructor(private readonly vehicleEntity: VehicleEntity) {}
@@ -31,11 +32,23 @@ export class VehiclesService {
       if (error instanceof Error) {
         throw new BadRequestException(error.message);
       }
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการดึงข้อมูล');
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} vehicle`;
+  async findOne(id: Types.ObjectId) {
+    try {
+      const data = await this.vehicleEntity.findOne({ _id: id });
+      if (!data) {
+        throw new NotFoundException(`ไม่พบข้อมูลรถรหัส ${id}`);
+      }
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการดึงข้อมูล');
+    }
   }
 
   update(id: number, updateVehicleDto: UpdateVehicleDto) {
