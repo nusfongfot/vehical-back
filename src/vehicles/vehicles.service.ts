@@ -1,14 +1,9 @@
-import {
-  BadRequestException,
-  HttpException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleEntity } from './entities/vehicle.entity';
-import { mongo, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import { handleServiceError } from '../common/utils/error-handler.util';
 @Injectable()
 export class VehiclesService {
   constructor(private readonly vehicleEntity: VehicleEntity) {}
@@ -17,11 +12,8 @@ export class VehiclesService {
     try {
       const createData = await this.vehicleEntity.save(createVehicleDto);
       return createData;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new BadRequestException(error.message);
-      }
-      throw new InternalServerErrorException('ไม่สามารถบันทึกข้อมูลรถได้');
+    } catch (error) {
+      handleServiceError(error, 'ไม่สามารถบันทึกข้อมูลรถได้');
     }
   }
 
@@ -30,10 +22,7 @@ export class VehiclesService {
       const data = await this.vehicleEntity.find();
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new BadRequestException(error.message);
-      }
-      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการดึงข้อมูล');
+      handleServiceError(error, 'เกิดข้อผิดพลาดในการดึงข้อมูล');
     }
   }
 
@@ -41,14 +30,11 @@ export class VehiclesService {
     try {
       const data = await this.vehicleEntity.findOne({ _id: id });
       if (!data) {
-        throw new NotFoundException(`ไม่พบข้อมูลรถรหัส ${id}`);
+        throw new NotFoundException([`ไม่พบข้อมูลรถรหัส ${id}`]);
       }
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new BadRequestException(error.message);
-      }
-      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการดึงข้อมูล');
+      handleServiceError(error, 'เกิดข้อผิดพลาดในการดึงข้อมูล');
     }
   }
 
@@ -63,17 +49,11 @@ export class VehiclesService {
         },
       );
       if (!data) {
-        throw new NotFoundException(`ไม่พบข้อมูลรถรหัส ${id}`);
+        throw new NotFoundException([`ไม่พบข้อมูลรถรหัส ${id}`]);
       }
       return data;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      if (error instanceof mongo.MongoServerError && error.code === 11000) {
-        throw new BadRequestException('ข้อมูลที่อัปเดตซ้ำกับข้อมูลที่มีอยู่ในระบบ');
-      }
-      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
+      handleServiceError(error, 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
     }
   }
 
@@ -83,14 +63,11 @@ export class VehiclesService {
         _id: id,
       });
       if (!result) {
-        throw new NotFoundException(`ไม่พบข้อมูลรถรหัส ${id}`);
+        throw new NotFoundException([`ไม่พบข้อมูลรถรหัส ${id}`]);
       }
       return result;
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการลบข้อมูล');
+      handleServiceError(error, 'เกิดข้อผิดพลาดในการลบข้อมูล');
     }
   }
 
@@ -100,14 +77,11 @@ export class VehiclesService {
         _id: { $in: ids },
       });
       if (result === 0) {
-        throw new NotFoundException('ไม่พบข้อมูลรถที่ต้องการลบ (ข้อมูลอาจถูกลบไปแล้ว)');
+        throw new NotFoundException(['ไม่พบข้อมูลรถที่ต้องการลบ (ข้อมูลอาจถูกลบไปแล้ว)']);
       }
       return { deleted: true, count: ids.length };
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการลบข้อมูล');
+      handleServiceError(error, 'เกิดข้อผิดพลาดในการลบข้อมูล');
     }
   }
 }
