@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import { VehiclesModule } from './vehicles/vehicles.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 @Module({
@@ -44,6 +45,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
       serviceId: 'vehical-back',
     }),
+    VehiclesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
