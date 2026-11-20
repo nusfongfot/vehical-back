@@ -10,7 +10,7 @@ export enum EnergyType {
   HYBRID = 'HYBRID',
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true,  versionKey: false, })
 export class Vehicle {
   @Prop({ required: true, unique: true, trim: true })
   vehiclePlate: string;
