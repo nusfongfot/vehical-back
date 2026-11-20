@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleEntity } from './entities/vehicle.entity';
@@ -6,9 +10,17 @@ import { VehicleEntity } from './entities/vehicle.entity';
 @Injectable()
 export class VehiclesService {
   constructor(private readonly vehicleEntity: VehicleEntity) {}
-  
-  create(createVehicleDto: CreateVehicleDto) {
-    return 'This action adds a new vehicle';
+
+  async create(createVehicleDto: CreateVehicleDto) {
+    try {
+      const createData = await this.vehicleEntity.save(createVehicleDto);
+      return createData;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
+      throw new InternalServerErrorException('ไม่สามารถบันทึกข้อมูลรถได้');
+    }
   }
 
   findAll() {
