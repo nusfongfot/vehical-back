@@ -77,7 +77,20 @@ export class VehiclesService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vehicle`;
+  async remove(id: Types.ObjectId) {
+    try {
+      const result = await this.vehicleEntity.deleteOne({
+        _id: id,
+      });
+      if (!result) {
+        throw new NotFoundException(`ไม่พบข้อมูลรถรหัส ${id}`);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการลบข้อมูล');
+    }
   }
 }

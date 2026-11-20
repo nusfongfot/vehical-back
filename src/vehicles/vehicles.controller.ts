@@ -71,7 +71,16 @@ export class VehiclesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.vehiclesService.remove(+id);
+  @ApiParam({ name: 'id', type: String, description: 'รหัส ObjectId ของรถ' })
+  async remove(@Param('id') id: Types.ObjectId) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('รูปแบบ ID ไม่ถูกต้อง');
+    }
+    const data = await this.vehiclesService.remove(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'ลบข้อมูลสำเร็จ',
+      data,
+    };
   }
 }
