@@ -21,7 +21,7 @@ export abstract class BaseEntity<T> {
   async find(
     filter: QueryFilter<HydratedDocument<T>> = {},
   ): Promise<HydratedDocument<T>[]> {
-    return this.entityModel.find(filter).exec();
+    return this.entityModel.find(filter).sort({ createdAt: -1 }).exec();
   }
 
   async findOneAndUpdate(
