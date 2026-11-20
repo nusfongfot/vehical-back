@@ -14,9 +14,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule],      
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_URI'),
+        dbName: process.env.DB_NAME ?? 'test',
         onConnectionCreate: (connection: Connection) => {
           const logger = new Logger('MongoDB');
 
